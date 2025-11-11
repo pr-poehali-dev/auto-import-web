@@ -1,554 +1,422 @@
 import { useState, useEffect } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import Icon from '@/components/ui/icon';
 import { Input } from '@/components/ui/input';
-import { Slider } from '@/components/ui/slider';
+import { Textarea } from '@/components/ui/textarea';
+import Icon from '@/components/ui/icon';
 
 const Index = () => {
-  const { scrollY } = useScroll();
-  const [selectedCar, setSelectedCar] = useState<number | null>(null);
-  const [carPrice, setCarPrice] = useState(3000000);
-  const [deliveryCost, setDeliveryCost] = useState(250000);
+  const [scrollY, setScrollY] = useState(0);
+  const [visibleSections, setVisibleSections] = useState<Set<string>>(new Set());
 
-  const heroOpacity = useTransform(scrollY, [0, 300], [1, 0]);
-  const heroScale = useTransform(scrollY, [0, 300], [1, 0.95]);
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrollY(window.scrollY);
+
+      const sections = document.querySelectorAll('[data-section]');
+      const windowHeight = window.innerHeight;
+      const newVisible = new Set<string>();
+
+      sections.forEach((section) => {
+        const rect = section.getBoundingClientRect();
+        if (rect.top < windowHeight * 0.8 && rect.bottom > 0) {
+          const sectionId = section.getAttribute('data-section');
+          if (sectionId) newVisible.add(sectionId);
+        }
+      });
+
+      setVisibleSections(newVisible);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const cars = [
     {
       id: 1,
-      brand: 'Toyota',
-      model: 'Land Cruiser 300',
-      year: 2023,
-      price: '8 500 000',
-      image: '🚙',
-      specs: ['3.5L V6', '415 л.с.', 'Полный привод']
+      name: 'Toyota Camry 2024',
+      price: 'от 2 850 000 ₽',
+      image: 'https://cdn.poehali.dev/projects/412f2701-bf24-4287-bc7d-a92ee6e7bcba/files/faee5d48-f8d4-4f40-a434-f4e6c92b31e1.jpg',
+      specs: ['2.5L', '181 л.с.', 'CVT']
     },
     {
       id: 2,
-      brand: 'Lexus',
-      model: 'LX 600',
-      year: 2023,
-      price: '12 800 000',
-      image: '🚗',
-      specs: ['3.5L V6', '409 л.с.', 'Гибрид']
+      name: 'Hyundai Tucson 2024',
+      price: 'от 3 200 000 ₽',
+      image: 'https://cdn.poehali.dev/projects/412f2701-bf24-4287-bc7d-a92ee6e7bcba/files/c49fa13a-d8d4-40db-83f1-87d60553b20b.jpg',
+      specs: ['2.0L', '150 л.с.', 'AT']
     },
     {
       id: 3,
-      brand: 'Toyota',
-      model: 'Alphard',
-      year: 2023,
-      price: '6 200 000',
-      image: '🚐',
-      specs: ['2.5L Hybrid', '7 мест', 'Premium']
+      name: 'BYD Han EV 2024',
+      price: 'от 4 100 000 ₽',
+      image: 'https://cdn.poehali.dev/projects/412f2701-bf24-4287-bc7d-a92ee6e7bcba/files/c36d3a51-4e12-4896-b1e1-2bbfe1a14d36.jpg',
+      specs: ['Электро', '517 л.с.', '605 км']
+    }
+  ];
+
+  const services = [
+    {
+      icon: 'Search',
+      title: 'Подбор автомобиля',
+      description: 'Найдём идеальный автомобиль по вашим требованиям и бюджету'
     },
     {
-      id: 4,
-      brand: 'Nissan',
-      model: 'Patrol',
-      year: 2023,
-      price: '7 900 000',
-      image: '🚙',
-      specs: ['5.6L V8', '400 л.с.', 'Люкс']
+      icon: 'Shield',
+      title: 'Полная проверка',
+      description: 'Детальная диагностика и проверка истории авто перед покупкой'
+    },
+    {
+      icon: 'Ship',
+      title: 'Доставка в РФ',
+      description: 'Организуем безопасную доставку из любой страны Азии'
+    },
+    {
+      icon: 'FileText',
+      title: 'Таможенное оформление',
+      description: 'Полное сопровождение растаможки и документов'
     }
   ];
 
   const steps = [
     {
-      icon: 'Search',
-      title: 'Подбор автомобиля',
-      description: 'Находим идеальный вариант под ваш бюджет и требования'
+      number: '01',
+      title: 'Консультация',
+      description: 'Обсуждаем ваши пожелания, подбираем варианты'
     },
     {
-      icon: 'FileCheck',
-      title: 'Проверка и оформление',
-      description: 'Полная проверка истории, аукционный лист, документы'
+      number: '02',
+      title: 'Поиск и проверка',
+      description: 'Находим автомобиль, проверяем состояние'
     },
     {
-      icon: 'Ship',
+      number: '03',
+      title: 'Покупка',
+      description: 'Выкупаем авто на аукционе или у дилера'
+    },
+    {
+      number: '04',
       title: 'Доставка',
-      description: 'Морская перевозка и таможенное оформление'
-    },
-    {
-      icon: 'Key',
-      title: 'Передача ключей',
-      description: 'Получаете готовый автомобиль с российскими документами'
-    }
-  ];
-
-  const features = [
-    {
-      icon: 'Shield',
-      title: 'Гарантия качества',
-      description: 'Проверяем каждый автомобиль перед отправкой'
-    },
-    {
-      icon: 'Clock',
-      title: 'Быстро',
-      description: 'Доставка за 30-45 дней от заказа до получения'
-    },
-    {
-      icon: 'Wallet',
-      title: 'Выгодно',
-      description: 'Экономия до 30% по сравнению с рынком РФ'
-    },
-    {
-      icon: 'Users',
-      title: 'Опыт',
-      description: 'Более 500 довольных клиентов за 5 лет работы'
+      description: 'Организуем доставку и растаможку'
     }
   ];
 
   const reviews = [
     {
-      name: 'Александр М.',
-      car: 'Toyota Land Cruiser 300',
-      text: 'Отличный сервис! Помогли с выбором, все этапы прозрачны. Получил машину мечты за адекватные деньги.',
+      name: 'Дмитрий Соколов',
+      text: 'Спасибо LSR CARS за профессиональную работу! Привезли Camry из Японии за 3 недели. Всё прозрачно и честно.',
       rating: 5
     },
     {
-      name: 'Дмитрий К.',
-      car: 'Lexus LX 600',
-      text: 'Профессиональный подход. Все документы в порядке, машина в идеальном состоянии. Рекомендую!',
+      name: 'Анна Волкова',
+      text: 'Очень довольна сервисом! Помогли с выбором, все документы оформили быстро. Рекомендую!',
       rating: 5
     },
     {
-      name: 'Сергей П.',
-      car: 'Toyota Alphard',
-      text: 'Быстро нашли нужную комплектацию. Доставка точно в срок. Буду обращаться еще!',
+      name: 'Сергей Петров',
+      text: 'Отличная команда! Привезли Tucson из Кореи. Машина в идеальном состоянии, цена справедливая.',
       rating: 5
     }
   ];
 
   return (
-    <div className="min-h-screen bg-background overflow-x-hidden">
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="text-2xl font-bold"
-          >
-            LSR CARS
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="hidden md:flex gap-6 items-center"
-          >
-            <a href="#catalog" className="hover:text-accent transition-colors">Каталог</a>
-            <a href="#process" className="hover:text-accent transition-colors">Как работаем</a>
-            <a href="#calculator" className="hover:text-accent transition-colors">Калькулятор</a>
-            <a href="#reviews" className="hover:text-accent transition-colors">Отзывы</a>
-            <Button>Связаться</Button>
-          </motion.div>
+    <div className="min-h-screen bg-background">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="text-2xl font-bold text-primary">LSR CARS</div>
+            <div className="hidden md:flex items-center gap-8">
+              <a href="#catalog" className="text-sm hover:text-primary transition-colors">Каталог</a>
+              <a href="#services" className="text-sm hover:text-primary transition-colors">Услуги</a>
+              <a href="#process" className="text-sm hover:text-primary transition-colors">Процесс</a>
+              <a href="#reviews" className="text-sm hover:text-primary transition-colors">Отзывы</a>
+              <a href="#about" className="text-sm hover:text-primary transition-colors">О нас</a>
+              <Button size="sm">Связаться</Button>
+            </div>
+          </div>
         </div>
       </nav>
 
-      <motion.section 
-        style={{ opacity: heroOpacity, scale: heroScale }}
-        className="relative min-h-screen flex items-center justify-center pt-20"
-      >
-        <div className="absolute inset-0 bg-gradient-to-br from-accent/5 via-background to-background" />
-        <div className="container mx-auto px-4 z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="text-center max-w-4xl mx-auto"
-          >
-            <motion.h1 
-              className="text-5xl md:text-7xl font-bold mb-6"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-            >
-              Автомобили из Азии
-              <br />
-              <span className="text-accent">под ключ</span>
-            </motion.h1>
-            <motion.p
-              className="text-xl md:text-2xl text-muted-foreground mb-8"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4 }}
-            >
-              Официальный импорт премиальных автомобилей из Японии, Кореи и ОАЭ
-            </motion.p>
-            <motion.div
-              className="flex flex-col sm:flex-row gap-4 justify-center"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6 }}
-            >
-              <Button size="lg" className="text-lg px-8">
-                Подобрать авто
-                <Icon name="ArrowRight" size={20} className="ml-2" />
-              </Button>
-              <Button size="lg" variant="outline" className="text-lg px-8">
-                Рассчитать стоимость
-              </Button>
-            </motion.div>
-          </motion.div>
-          
-          <motion.div
-            className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto"
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8 }}
-          >
-            {[
-              { value: '500+', label: 'Авто продано' },
-              { value: '30%', label: 'Экономия' },
-              { value: '5 лет', label: 'На рынке' },
-              { value: '45 дней', label: 'Доставка' }
-            ].map((stat, index) => (
-              <motion.div
-                key={index}
-                className="text-center"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.9 + index * 0.1 }}
-              >
-                <div className="text-3xl md:text-4xl font-bold text-accent mb-2">{stat.value}</div>
-                <div className="text-sm text-muted-foreground">{stat.label}</div>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </motion.section>
-
-      <section id="catalog" className="py-20 bg-secondary/30">
-        <div className="container mx-auto px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">Популярные модели</h2>
-            <p className="text-xl text-muted-foreground">Автомобили в наличии и под заказ</p>
-          </motion.div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {cars.map((car, index) => (
-              <motion.div
-                key={car.id}
-                initial={{ opacity: 0, y: 50 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-              >
-                <Card
-                  className="overflow-hidden cursor-pointer hover:shadow-2xl transition-all duration-300 group"
-                  onClick={() => setSelectedCar(car.id)}
-                >
-                  <div className="aspect-video bg-gradient-to-br from-accent/10 to-accent/5 flex items-center justify-center text-8xl group-hover:scale-110 transition-transform duration-300">
-                    {car.image}
-                  </div>
-                  <div className="p-6">
-                    <div className="text-sm text-muted-foreground mb-1">{car.year}</div>
-                    <h3 className="text-xl font-bold mb-2">{car.brand} {car.model}</h3>
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {car.specs.map((spec, i) => (
-                        <span key={i} className="text-xs bg-secondary px-2 py-1 rounded">
-                          {spec}
-                        </span>
-                      ))}
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="text-2xl font-bold text-accent">{car.price} ₽</div>
-                      <Button size="sm" variant="ghost">
-                        <Icon name="ArrowRight" size={20} />
-                      </Button>
-                    </div>
-                  </div>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-
-          <motion.div
-            className="text-center mt-12"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-          >
-            <Button size="lg" variant="outline">
-              Смотреть весь каталог
-              <Icon name="ExternalLink" size={20} className="ml-2" />
+      <section className="relative h-screen flex items-center justify-center overflow-hidden">
+        <div 
+          className="absolute inset-0 bg-gradient-to-br from-background via-background to-secondary"
+          style={{ transform: `translateY(${scrollY * 0.5}px)` }}
+        />
+        <div className="container mx-auto px-6 relative z-10 text-center">
+          <h1 className="text-6xl md:text-8xl font-bold mb-6 animate-fade-in-up">
+            Импорт авто<br />из Азии
+          </h1>
+          <p className="text-xl md:text-2xl text-muted-foreground mb-8 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+            Официальная доставка с полным сопровождением
+          </p>
+          <div className="flex gap-4 justify-center animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
+            <Button size="lg" className="text-lg px-8">
+              Подобрать авто
             </Button>
-          </motion.div>
-        </div>
-      </section>
-
-      <section id="process" className="py-20">
-        <div className="container mx-auto px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">Как мы работаем</h2>
-            <p className="text-xl text-muted-foreground">Простой процесс от заявки до получения авто</p>
-          </motion.div>
-
-          <div className="max-w-6xl mx-auto">
-            {steps.map((step, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, x: index % 2 === 0 ? -50 : 50 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.2 }}
-                className="flex flex-col md:flex-row items-center gap-8 mb-16 last:mb-0"
-              >
-                <div className={`flex-1 ${index % 2 === 1 ? 'md:order-2' : ''}`}>
-                  <Card className="p-8 hover:shadow-xl transition-shadow duration-300">
-                    <div className="flex items-start gap-4">
-                      <div className="w-12 h-12 bg-accent text-accent-foreground rounded-full flex items-center justify-center flex-shrink-0">
-                        <Icon name={step.icon as any} size={24} />
-                      </div>
-                      <div>
-                        <h3 className="text-2xl font-bold mb-2">{step.title}</h3>
-                        <p className="text-muted-foreground">{step.description}</p>
-                      </div>
-                    </div>
-                  </Card>
-                </div>
-                <div className="w-20 h-20 bg-accent/10 rounded-full flex items-center justify-center text-3xl font-bold text-accent flex-shrink-0">
-                  {index + 1}
-                </div>
-              </motion.div>
-            ))}
+            <Button size="lg" variant="outline" className="text-lg px-8">
+              Консультация
+            </Button>
           </div>
         </div>
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+          <Icon name="ChevronDown" size={32} className="text-muted-foreground" />
+        </div>
       </section>
 
-      <section className="py-20 bg-secondary/30">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {features.map((feature, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-              >
-                <Card className="p-6 text-center hover:shadow-xl transition-shadow duration-300 h-full">
-                  <div className="w-16 h-16 bg-accent text-accent-foreground rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Icon name={feature.icon as any} size={32} />
-                  </div>
-                  <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
-                  <p className="text-muted-foreground">{feature.description}</p>
-                </Card>
-              </motion.div>
-            ))}
+      <section id="catalog" data-section="catalog" className="py-24 bg-secondary/50">
+        <div className="container mx-auto px-6">
+          <div className={`text-center mb-16 transition-all duration-1000 ${visibleSections.has('catalog') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+            <h2 className="text-5xl font-bold mb-4">Популярные модели</h2>
+            <p className="text-xl text-muted-foreground">Актуальные предложения из стран Азии</p>
           </div>
-        </div>
-      </section>
-
-      <section id="calculator" className="py-20">
-        <div className="container mx-auto px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="max-w-3xl mx-auto"
-          >
-            <h2 className="text-4xl md:text-5xl font-bold mb-4 text-center">Калькулятор стоимости</h2>
-            <p className="text-xl text-muted-foreground mb-12 text-center">
-              Узнайте ориентировочную стоимость автомобиля с доставкой
-            </p>
-
-            <Card className="p-8">
-              <div className="space-y-8">
-                <div>
-                  <label className="block text-sm font-medium mb-3">
-                    Стоимость автомобиля на аукционе: {carPrice.toLocaleString('ru-RU')} ₽
-                  </label>
-                  <Slider
-                    value={[carPrice]}
-                    onValueChange={(value) => setCarPrice(value[0])}
-                    min={1000000}
-                    max={20000000}
-                    step={100000}
-                    className="mb-2"
-                  />
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>1 000 000 ₽</span>
-                    <span>20 000 000 ₽</span>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-3">
-                    Стоимость доставки: {deliveryCost.toLocaleString('ru-RU')} ₽
-                  </label>
-                  <Slider
-                    value={[deliveryCost]}
-                    onValueChange={(value) => setDeliveryCost(value[0])}
-                    min={150000}
-                    max={500000}
-                    step={10000}
-                    className="mb-2"
-                  />
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>150 000 ₽</span>
-                    <span>500 000 ₽</span>
-                  </div>
-                </div>
-
-                <div className="bg-accent/5 p-6 rounded-lg">
-                  <div className="space-y-3">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Стоимость авто:</span>
-                      <span className="font-semibold">{carPrice.toLocaleString('ru-RU')} ₽</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Доставка и растаможка:</span>
-                      <span className="font-semibold">{deliveryCost.toLocaleString('ru-RU')} ₽</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Наши услуги (10%):</span>
-                      <span className="font-semibold">{(carPrice * 0.1).toLocaleString('ru-RU')} ₽</span>
-                    </div>
-                    <div className="border-t pt-3 mt-3">
-                      <div className="flex justify-between items-center">
-                        <span className="text-xl font-bold">Итого:</span>
-                        <span className="text-3xl font-bold text-accent">
-                          {(carPrice + deliveryCost + carPrice * 0.1).toLocaleString('ru-RU')} ₽
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <Button className="w-full" size="lg">
-                  Получить точный расчет
-                  <Icon name="Calculator" size={20} className="ml-2" />
-                </Button>
-              </div>
-            </Card>
-          </motion.div>
-        </div>
-      </section>
-
-      <section id="reviews" className="py-20 bg-secondary/30">
-        <div className="container mx-auto px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">Отзывы клиентов</h2>
-            <p className="text-xl text-muted-foreground">Что говорят наши клиенты</p>
-          </motion.div>
-
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {reviews.map((review, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.15 }}
+          <div className="grid md:grid-cols-3 gap-8">
+            {cars.map((car, index) => (
+              <Card 
+                key={car.id}
+                className={`group overflow-hidden bg-card border-border hover:border-primary transition-all duration-500 hover:scale-105 hover:shadow-2xl ${visibleSections.has('catalog') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+                style={{ transitionDelay: `${index * 0.2}s` }}
               >
-                <Card className="p-6 h-full hover:shadow-xl transition-shadow duration-300">
-                  <div className="flex gap-1 mb-4">
-                    {[...Array(review.rating)].map((_, i) => (
-                      <Icon key={i} name="Star" size={20} className="fill-accent text-accent" />
+                <div className="relative overflow-hidden h-64">
+                  <img 
+                    src={car.image} 
+                    alt={car.name}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </div>
+                <div className="p-6">
+                  <h3 className="text-2xl font-bold mb-2">{car.name}</h3>
+                  <p className="text-3xl font-bold text-primary mb-4">{car.price}</p>
+                  <div className="flex gap-4 mb-4">
+                    {car.specs.map((spec, i) => (
+                      <span key={i} className="text-sm text-muted-foreground bg-muted px-3 py-1 rounded-full">
+                        {spec}
+                      </span>
                     ))}
                   </div>
-                  <p className="text-muted-foreground mb-4">{review.text}</p>
-                  <div className="border-t pt-4">
-                    <div className="font-semibold">{review.name}</div>
-                    <div className="text-sm text-muted-foreground">{review.car}</div>
-                  </div>
-                </Card>
-              </motion.div>
+                  <Button className="w-full" variant="outline">
+                    Подробнее
+                  </Button>
+                </div>
+              </Card>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="py-20">
-        <div className="container mx-auto px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="max-w-2xl mx-auto"
-          >
-            <Card className="p-8 md:p-12 bg-gradient-to-br from-accent/5 to-accent/10">
-              <div className="text-center mb-8">
-                <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                  Готовы начать?
-                </h2>
-                <p className="text-xl text-muted-foreground">
-                  Оставьте заявку и получите консультацию в течение 15 минут
-                </p>
-              </div>
-
-              <div className="space-y-4">
-                <Input placeholder="Ваше имя" className="h-12" />
-                <Input type="tel" placeholder="Телефон" className="h-12" />
-                <Input placeholder="Какой автомобиль интересует?" className="h-12" />
-                <Button className="w-full" size="lg">
-                  Отправить заявку
-                  <Icon name="Send" size={20} className="ml-2" />
-                </Button>
-                <p className="text-xs text-center text-muted-foreground">
-                  Нажимая кнопку, вы соглашаетесь с политикой конфиденциальности
-                </p>
-              </div>
-            </Card>
-          </motion.div>
+      <section id="services" data-section="services" className="py-24">
+        <div className="container mx-auto px-6">
+          <div className={`text-center mb-16 transition-all duration-1000 ${visibleSections.has('services') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+            <h2 className="text-5xl font-bold mb-4">Наши услуги</h2>
+            <p className="text-xl text-muted-foreground">Полный цикл импорта под ключ</p>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {services.map((service, index) => (
+              <Card 
+                key={index}
+                className={`p-8 bg-card border-border hover:border-primary hover:bg-secondary/50 transition-all duration-500 hover:scale-105 ${visibleSections.has('services') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+                style={{ transitionDelay: `${index * 0.15}s` }}
+              >
+                <div className="w-16 h-16 bg-primary/20 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-primary transition-colors">
+                  <Icon name={service.icon} size={32} className="text-primary" />
+                </div>
+                <h3 className="text-xl font-bold mb-3">{service.title}</h3>
+                <p className="text-muted-foreground">{service.description}</p>
+              </Card>
+            ))}
+          </div>
         </div>
       </section>
 
-      <footer className="bg-primary text-primary-foreground py-12">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-4 gap-8">
+      <section id="process" data-section="process" className="py-24 bg-secondary/50">
+        <div className="container mx-auto px-6">
+          <div className={`text-center mb-16 transition-all duration-1000 ${visibleSections.has('process') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+            <h2 className="text-5xl font-bold mb-4">Процесс работы</h2>
+            <p className="text-xl text-muted-foreground">Простые шаги до получения авто</p>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {steps.map((step, index) => (
+              <div 
+                key={index}
+                className={`relative transition-all duration-1000 ${visibleSections.has('process') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+                style={{ transitionDelay: `${index * 0.2}s` }}
+              >
+                <div className="text-8xl font-bold text-primary/20 mb-4">{step.number}</div>
+                <h3 className="text-2xl font-bold mb-3">{step.title}</h3>
+                <p className="text-muted-foreground">{step.description}</p>
+                {index < steps.length - 1 && (
+                  <div className="hidden lg:block absolute top-12 -right-4 w-8 h-0.5 bg-primary/30" />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="reviews" data-section="reviews" className="py-24">
+        <div className="container mx-auto px-6">
+          <div className={`text-center mb-16 transition-all duration-1000 ${visibleSections.has('reviews') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+            <h2 className="text-5xl font-bold mb-4">Отзывы клиентов</h2>
+            <p className="text-xl text-muted-foreground">Что говорят о нас</p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-8">
+            {reviews.map((review, index) => (
+              <Card 
+                key={index}
+                className={`p-8 bg-card border-border hover:border-primary transition-all duration-500 hover:scale-105 ${visibleSections.has('reviews') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+                style={{ transitionDelay: `${index * 0.2}s` }}
+              >
+                <div className="flex gap-1 mb-4">
+                  {[...Array(review.rating)].map((_, i) => (
+                    <Icon key={i} name="Star" size={20} className="text-primary fill-primary" />
+                  ))}
+                </div>
+                <p className="text-muted-foreground mb-6 italic">"{review.text}"</p>
+                <p className="font-bold">{review.name}</p>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="about" data-section="about" className="py-24 bg-secondary/50">
+        <div className="container mx-auto px-6">
+          <div className={`max-w-4xl mx-auto transition-all duration-1000 ${visibleSections.has('about') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+            <h2 className="text-5xl font-bold mb-8 text-center">О компании</h2>
+            <div className="space-y-6 text-lg text-muted-foreground">
+              <p>
+                <span className="text-primary font-bold">LSR CARS</span> — надёжный партнёр в импорте автомобилей из стран Азии. 
+                Мы специализируемся на доставке качественных автомобилей из Японии, Кореи и Китая с полным юридическим 
+                сопровождением.
+              </p>
+              <p>
+                За годы работы мы помогли сотням клиентов приобрести автомобили мечты по честным ценам. 
+                Наша команда профессионалов обеспечивает полный контроль на каждом этапе — от подбора до получения ключей.
+              </p>
+              <div className="grid md:grid-cols-3 gap-8 mt-12">
+                <div className="text-center">
+                  <div className="text-5xl font-bold text-primary mb-2">500+</div>
+                  <div className="text-sm">Довольных клиентов</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-5xl font-bold text-primary mb-2">7 лет</div>
+                  <div className="text-sm">На рынке</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-5xl font-bold text-primary mb-2">100%</div>
+                  <div className="text-sm">Легальный импорт</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="contact" data-section="contact" className="py-24">
+        <div className="container mx-auto px-6">
+          <div className="max-w-4xl mx-auto">
+            <div className={`text-center mb-16 transition-all duration-1000 ${visibleSections.has('contact') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+              <h2 className="text-5xl font-bold mb-4">Свяжитесь с нами</h2>
+              <p className="text-xl text-muted-foreground">Ответим на все вопросы и поможем с выбором</p>
+            </div>
+            <div className="grid md:grid-cols-2 gap-12">
+              <Card className={`p-8 bg-card border-border transition-all duration-1000 ${visibleSections.has('contact') ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'}`}>
+                <h3 className="text-2xl font-bold mb-6">Контактная информация</h3>
+                <div className="space-y-4">
+                  <div className="flex items-start gap-4">
+                    <Icon name="Phone" size={24} className="text-primary mt-1" />
+                    <div>
+                      <div className="font-semibold">Телефон</div>
+                      <div className="text-muted-foreground">+7 (999) 123-45-67</div>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-4">
+                    <Icon name="Mail" size={24} className="text-primary mt-1" />
+                    <div>
+                      <div className="font-semibold">Email</div>
+                      <div className="text-muted-foreground">info@lsrcars.ru</div>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-4">
+                    <Icon name="MapPin" size={24} className="text-primary mt-1" />
+                    <div>
+                      <div className="font-semibold">Адрес</div>
+                      <div className="text-muted-foreground">Москва, ул. Примерная, 123</div>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-4">
+                    <Icon name="Clock" size={24} className="text-primary mt-1" />
+                    <div>
+                      <div className="font-semibold">Режим работы</div>
+                      <div className="text-muted-foreground">Пн-Пт: 9:00 - 19:00<br />Сб-Вс: 10:00 - 16:00</div>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+              <Card className={`p-8 bg-card border-border transition-all duration-1000 ${visibleSections.has('contact') ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10'}`}>
+                <h3 className="text-2xl font-bold mb-6">Оставить заявку</h3>
+                <form className="space-y-4">
+                  <div>
+                    <Input placeholder="Ваше имя" className="bg-background" />
+                  </div>
+                  <div>
+                    <Input type="tel" placeholder="Телефон" className="bg-background" />
+                  </div>
+                  <div>
+                    <Input type="email" placeholder="Email" className="bg-background" />
+                  </div>
+                  <div>
+                    <Textarea placeholder="Сообщение" className="bg-background min-h-[120px]" />
+                  </div>
+                  <Button className="w-full" size="lg">
+                    Отправить заявку
+                  </Button>
+                </form>
+              </Card>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer className="bg-secondary/50 border-t border-border py-12">
+        <div className="container mx-auto px-6">
+          <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div>
-              <div className="text-2xl font-bold mb-4">LSR CARS</div>
-              <p className="text-sm opacity-80">
-                Официальный импорт автомобилей из стран Азии
+              <div className="text-2xl font-bold text-primary mb-4">LSR CARS</div>
+              <p className="text-sm text-muted-foreground">
+                Импорт автомобилей из Азии с полным сопровождением
               </p>
             </div>
             <div>
-              <h3 className="font-semibold mb-4">Услуги</h3>
-              <ul className="space-y-2 text-sm opacity-80">
-                <li>Подбор автомобилей</li>
-                <li>Доставка</li>
-                <li>Растаможка</li>
-                <li>Сертификация</li>
-              </ul>
+              <h4 className="font-bold mb-4">Услуги</h4>
+              <div className="space-y-2 text-sm text-muted-foreground">
+                <div>Подбор авто</div>
+                <div>Доставка</div>
+                <div>Растаможка</div>
+                <div>Проверка</div>
+              </div>
             </div>
             <div>
-              <h3 className="font-semibold mb-4">Компания</h3>
-              <ul className="space-y-2 text-sm opacity-80">
-                <li>О нас</li>
-                <li>Отзывы</li>
-                <li>Контакты</li>
-                <li>Блог</li>
-              </ul>
+              <h4 className="font-bold mb-4">Компания</h4>
+              <div className="space-y-2 text-sm text-muted-foreground">
+                <div>О нас</div>
+                <div>Отзывы</div>
+                <div>Контакты</div>
+                <div>Блог</div>
+              </div>
             </div>
             <div>
-              <h3 className="font-semibold mb-4">Контакты</h3>
-              <ul className="space-y-2 text-sm opacity-80">
-                <li>+7 (999) 123-45-67</li>
-                <li>info@lsrcars.ru</li>
-                <li>Москва, ул. Примерная, 1</li>
-              </ul>
+              <h4 className="font-bold mb-4">Контакты</h4>
+              <div className="space-y-2 text-sm text-muted-foreground">
+                <div>+7 (999) 123-45-67</div>
+                <div>info@lsrcars.ru</div>
+                <div>Москва, ул. Примерная, 123</div>
+              </div>
             </div>
           </div>
-          <div className="border-t border-primary-foreground/20 mt-8 pt-8 text-center text-sm opacity-80">
+          <div className="border-t border-border pt-8 text-center text-sm text-muted-foreground">
             © 2024 LSR CARS. Все права защищены.
           </div>
         </div>
